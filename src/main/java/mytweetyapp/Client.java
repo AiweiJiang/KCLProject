@@ -1,7 +1,10 @@
 package mytweetyapp;
 
+import java.io.BufferedReader;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Scanner;
 
@@ -10,55 +13,74 @@ public class Client {
     public static void main(String[] args) {
 
         try {
-            //向本机的8888端口发出客户请求
+            //Make a request to port 8888 of the local computer
             Socket socket = new Socket("127.0.0.1", 8888);
-            // 接受服务器端传过来的信息
-            InputStream in = socket.getInputStream(); //接受服务器发来的数据
-            // 将agent输入的arguments发送给服务器端
+            // An input stream 'in' that receives information passed by the server
+            InputStream in = socket.getInputStream();
+            //BufferedReader br = new BufferedReader(new InputStreamReader(in));
+            // An output stream that transmits information to a server
             OutputStream out = socket.getOutputStream();
-            // 定义键盘输入，从而使agent输入arguments
+            //PrintWriter pw = new PrintWriter(out);
+
+
+            // Input from the keybard, allowing agents to input their inference rules
             Scanner input = new Scanner(System.in);
+            // Initialzing the flags. When 'flag' is true, the agent can continue to enter inference rules.
+            // When 'attackFlag' is true, the agent can enter argument to attack acceptable arguments.
             String flag = "yes";
             String attackFlag = "yes";
+            // Start accepting inference rules entered by the user and pass them to the server
             while (flag.trim().equals("yes")) {
                 System.out.println("please enter your arguments");
                 String str1 = input.nextLine();
                 out.write(str1.getBytes());
+                out.flush();
                 System.out.println("Continue to enter parameters or not:(yes or no)");
                 flag = input.nextLine();
                 out.write(flag.getBytes());
                 out.flush();
-                byte[] str = new byte[64];
-                in .read(str);
-                System.out.println("服务器发来的数据：" + new String(str));
+                byte[] str = new byte[24];
+                in.read(str);
+                System.out.println("The result of the server running: " + new String(str));
             }
+            // To attack an acceptable argument, the user enters an argument. If not, the user gets an acceptable
+            // set of arguments.
             while (attackFlag.trim().equals("yes")) {
-            	byte[] argumentByte = new byte[256];
-            	in.read(argumentByte);
-            	System.out.println("可接受的论点为： " + new String(argumentByte));
-            	System.out.println("是否输入论点以反驳(please enter yes or not):");
+            	
+            	System.out.println("The acceptable arguments: ");
+            	byte[] resultByte = new byte[1024];
+            	in.read(resultByte);
+            	String resultArg = new String(resultByte);
+            	//System.out.println(resultArg);
+            	String[] resultList = resultArg.split(";");
+            	for(int i = 0; i < resultList.length; i++) {
+            		System.out.println(resultList[i]);
+            	}
+            	// Decide whether to rebut
+            	System.out.println("Whether to enter arguments to refute (please enter yes or not):");
 				attackFlag = input.nextLine();
 				out.write(attackFlag.getBytes());
 				out.flush();
 				if (attackFlag.trim().equals("yes")) {
-					System.out.println("请输入你用以反驳的观点：");
+					System.out.println("Please enter the rebuttal argument：");
 					String refutedArgument = input.nextLine();
 					out.write(refutedArgument.getBytes());
 					out.flush();
+
 				}else {
 					break;
 				}
 				
 			}
             
-            // 关闭数据流
+            // close streams
             in .close();
-            out.flush(); //刷新缓冲区
+            out.flush(); // Flash the buffer
             out.close();
             input.close();
-            socket.close(); //关闭Socket
+            socket.close(); // close the socket
         } catch (Exception e) {
-            // TODO: handle exception
+            // handle exception
             e.printStackTrace();
         }
     }

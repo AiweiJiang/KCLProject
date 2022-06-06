@@ -4,14 +4,15 @@ import java.net.*;
 import java.io.*;
 
 public class Server extends Thread {
-    // 服务器将开始监听本地端口 8888
+    // The server will start listening on the local port 8888
     private static int portNumber = 8888;
 
     @Override
     public void run() {
         try {
+        	// initialzing the server
             ServerSocket server = new ServerSocket(portNumber);
-            System.out.println("服务启动成功：端口号为" + portNumber);
+            System.out.println("The server is started successfully. The port number is: " + portNumber);
             while (true) {
                 Socket socket = server.accept();
                 if (socket != null) {
@@ -19,7 +20,6 @@ public class Server extends Thread {
                 }
             }
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }

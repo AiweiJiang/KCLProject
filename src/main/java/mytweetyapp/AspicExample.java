@@ -37,6 +37,7 @@ public class AspicExample {
 		Proposition b = new Proposition("b");
 		Proposition c = new Proposition("c");
 		Proposition d = new Proposition("d");
+		Proposition e = new Proposition("e");
 		
 		AspicArgumentationTheory<PlFormula> t = new AspicArgumentationTheory<PlFormula>(new PlFormulaGenerator());
 		t.setRuleFormulaGenerator(new PlFormulaGenerator());
@@ -62,9 +63,18 @@ public class AspicExample {
 		r1.setName("d2");
 		t.addRule(r1);
 		
+//		r1 = new DefeasibleInferenceRule<PlFormula>();
+//		r1.setConclusion(new Negation(b));
+//		r1.addPremise(e);
+//		r1.setName("attack");
+//		t.addRule(r1);
 		
-		t.addAxiom(b);
-		t.addAxiom(c);
+		t.addOrdinaryPremise(b);
+		t.addOrdinaryPremise(c);
+//		t.addOrdinaryPremise(e);
+//		t.addAxiom(b);
+//		t.addAxiom(c);
+//		t.addAxiom(e);
 		
 		List<String> rule = new ArrayList<>();
 		rule.add("d1");
@@ -76,7 +86,7 @@ public class AspicExample {
 		t.setOrder(or);
 		ArrayList<AspicArgument<FolFormula>> argList1 = new ArrayList<>();
 		for(AspicArgument arg:t.getArguments()) {
-			System.out.println(arg.toString());
+			//System.out.println(arg.toString());
 			argList1.add(arg);
 		}
 		
@@ -86,7 +96,7 @@ public class AspicExample {
 		Extension<DungTheory> Ex1 = new Extension<DungTheory>();
 		ArrayList<Argument> argList = new ArrayList<Argument>();
 		for(Argument arg: aaf) {
-			//System.out.println(arg.toString());
+			System.out.println(arg.toString());
 			argList.add(arg);
 			Ex1.add(arg);
 		}
@@ -94,8 +104,14 @@ public class AspicExample {
 		
 		System.out.println(aaf.isAcceptable(argList.get(3),Ex1));
 		
-		System.out.println();
+		System.out.println(argList1.get(3).getConclusion().getClass());
 		
+//		Argument a1 = new Argument("attack");
+//		
+//		aaf.add(a1);
+//		
+//		Attack at = new Attack(a1, argList.get(0));
+//		aaf.add(at);
 		
 		
 		for(Attack att: aaf.getAttacks())

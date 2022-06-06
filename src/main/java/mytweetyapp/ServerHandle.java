@@ -1,11 +1,22 @@
 package mytweetyapp;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.ArrayList;
+
+import org.tweetyproject.arg.aspic.syntax.AspicArgumentationTheory;
+import org.tweetyproject.arg.dung.syntax.Argument;
+import org.tweetyproject.arg.dung.syntax.DungTheory;
+import org.tweetyproject.logics.pl.syntax.PlFormula;
+
+import javassist.expr.NewArray;
 
 public class ServerHandle extends Thread {
 
@@ -17,55 +28,98 @@ public class ServerHandle extends Thread {
     @Override
     public void run() {
         try {
-            // 客户端数据接受流
+            // An input stream that receives information from the server
             InputStream in = socket.getInputStream();
-            // 服务器端数据输出流
+            //BufferedReader br = new BufferedReader(new InputStreamReader(in));
+            // An output stream that transmits data to the client 
             OutputStream out = socket.getOutputStream();
-            System.out.println("服务器正在处理。。。");
-            // 分割传过来的arguments储存到argumentList变量中去
+           // PrintWriter pw = new PrintWriter(out);
+            
+            System.out.println("The server is processing。。。");
+            // Initialzing the list 'argumentList' which stores the arguments
             String[] argumentList = null;
-            // 用来控制是否继续输入论点的变量flag
+            // Initialize arguments whether to continue input parameters and whether to attack
             String flag = "yes";
             String attackFlag = "yes";
+            // Accept arguments passed from the client
             while (flag.trim().equals("yes")) {
-                byte[] str = new byte[1024]; in .read(str);
-                System.out.println("客户端输入的论点：" + new String(str));
-                // 将客户端发送过来的信息以逗号分段
+	        	byte[] str = new byte[1024];
+	        	in.read(str);
+                System.out.println("The arguments passed from client：" + new String(str));
+                // Separate arguments sent by the client with commas, then store the arguments into
+                // comma-separated List 'argumentList'
                 String str1 = new String(str);
                 argumentList = str1.split(",");
-                // 将每一段写进ASPIC文件中去
-                try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("C:\\Users\\dell\\Desktop\\AspicTest.aspic", true))) {
+                // Write each argument to a local ASPIC document
+                try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("C:\\Users\\dell\\Desktop\\aspictest.txt", true))) {
                     for (int i = 0; i <= argumentList.length - 1; i++) {
-                        bufferedWriter.write(argumentList[i] + "\n");
+                        if(i != argumentList.length - 1) {
+                        	bufferedWriter.write(argumentList[i].trim() + "\r\n");
+                        	bufferedWriter.flush();
+                        }
                     }
                 }
+                
                 byte[] s = new byte[64];
-                s = "数据以写入".getBytes();
+                s = "Data has been writen".getBytes();
                 out.write(s);
                 out.flush();
+                
                 byte[] flagStr = new byte[256];
                 in.read(flagStr);
                 flag = new String(flagStr);
+                
+                
             }
-            // 判断flag变量，如果该变量是yes则说明有攻击论点。
+            // Determine if there is a point to attack。
             while (attackFlag.trim().equals("yes")) {
-				System.out.println("开始推理");
-				byte[] resultByte = new byte[256];
-				resultByte = "可接受的论点".getBytes();
+				System.out.println("Start reasoning");
+				// Initialize an instance of BuiltAT that creates argumentation Theory 
+				// according to inference rules in the ASPIC document.
+				BulidAT bAt = new BulidAT();
+				AspicArgumentationTheory<PlFormula> t = bAt.buildArgT();
+				DungTheory aaf = t.asDungTheory();
+				// 把argList里的内容换成可接受的论点
+				ArrayList<Argument> argList = new ArrayList<>();
+				String accArg = "";
+				for(Argument arg:aaf) {
+					argList.add(arg);
+				}
+				
+				for(int i = 0; i < argList.size(); i++ ) {
+					if(i != argList.size() - 1) {
+						accArg += argList.get(i).toString() + ";";
+					}else {
+						accArg += argList.get(i).toString();
+					}
+				}
+				System.out.println(accArg);
+				byte[] resultByte = accArg.getBytes();
 				out.write(resultByte);
+				
 				byte[] attackFlagByte = new byte[256];
 				in.read(attackFlagByte);
 				attackFlag = new String(attackFlagByte);
 				if (attackFlag.trim().equals("yes")) {
-					byte[] refutedArgumentByte = new byte[256];
+					byte[] refutedArgumentByte = new byte[1024];
 					in.read(refutedArgumentByte);
-					System.out.println("反驳的论点为：" + new String(refutedArgumentByte));	
+					String refutedArgument = new String(refutedArgumentByte);
+					System.out.println("The rebuttal argument is: " + refutedArgument);
+					String[] rebuttalList = refutedArgument.split(",");
+					try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("C:\\Users\\dell\\Desktop\\aspictest.txt", true))) {
+	                    for (int i = 0; i <= rebuttalList.length - 1; i++) {
+	                    	 if(i != rebuttalList.length - 1) {
+	                         	bufferedWriter.write(rebuttalList[i].trim() + "\r\n");
+	                         	bufferedWriter.flush();
+	                         }
+	                    }
+	                }
 				}
 			}
 
             // 关闭数据流
-            out.close(); 
-            in .close();
+            in.close(); 
+            out.close();
             System.out.println("服务器处理完成。。。");
             socket.close();
         } catch (IOException e) {
