@@ -7,10 +7,9 @@ public class Server extends Thread {
     // The server will start listening on the local port 8888
     private static int portNumber = 8888;
 
-    @Override
     public void run() {
         try {
-        	// initialzing the server
+            // initialzing the server
             ServerSocket server = new ServerSocket(portNumber);
             System.out.println("The server is started successfully. The port number is: " + portNumber);
             while (true) {

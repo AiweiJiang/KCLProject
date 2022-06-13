@@ -21,6 +21,9 @@ import org.tweetyproject.logics.fol.syntax.FolFormula;
 import org.tweetyproject.logics.pl.parser.PlParser;
 import org.tweetyproject.logics.pl.syntax.Negation;
 import org.tweetyproject.logics.pl.syntax.Proposition;
+
+import javassist.expr.NewArray;
+
 import org.tweetyproject.logics.pl.syntax.PlFormula;
 
 /**
@@ -104,7 +107,7 @@ public class AspicExample {
 		
 		System.out.println(aaf.isAcceptable(argList.get(3),Ex1));
 		
-		System.out.println(argList1.get(3).getConclusion().getClass());
+		
 		
 //		Argument a1 = new Argument("attack");
 //		
@@ -113,6 +116,7 @@ public class AspicExample {
 //		Attack at = new Attack(a1, argList.get(0));
 //		aaf.add(at);
 		
+		System.out.println(new Proposition("sss").toString());
 		
 		for(Attack att: aaf.getAttacks())
 			System.out.println(att);	
