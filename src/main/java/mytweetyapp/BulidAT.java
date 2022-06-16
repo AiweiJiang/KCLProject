@@ -20,6 +20,16 @@ import org.tweetyproject.logics.pl.syntax.Negation;
 import org.tweetyproject.logics.pl.syntax.PlFormula;
 import org.tweetyproject.logics.pl.syntax.Proposition;
 
+/**
+ * This class implements the ASPIC parser:
+ * 1. Parsing the premise.
+ * 2. Parsing the inference rules.
+ * 3. Parsing the orders between the inference rules.
+ * 
+ * @author Jiang Aiwei
+ *
+ */
+
 public class BulidAT {
     public BulidAT() {
 
@@ -136,7 +146,7 @@ public class BulidAT {
             if (arr[0].equals("=>")) {
                 for (Proposition pro: proList) {
                     if (arr[1].equals(pro.toString())) {
-                        t.addAxiom(pro);
+                        t.addOrdinaryPremise(pro);
                     }
                 }
             }

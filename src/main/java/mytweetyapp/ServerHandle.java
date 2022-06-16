@@ -6,11 +6,27 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.time.chrono.ThaiBuddhistChronology;
 import java.util.ArrayList;
 import org.tweetyproject.arg.aspic.syntax.AspicArgumentationTheory;
+import org.tweetyproject.arg.dung.semantics.Extension;
 import org.tweetyproject.arg.dung.syntax.Argument;
+import org.tweetyproject.arg.dung.syntax.Attack;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
 import org.tweetyproject.logics.pl.syntax.PlFormula;
+
+/**
+ * This class is the main script for implementing server functions, which mainly include:
+ * 1. Receive inference rules and premises from client.
+ * 2. Write the rules and premises to a local file and parse it to build a argumentation theory.
+ * 3. Convert ASPIC+ Argumentation theory to Dung theory and get the acceptable arguments.
+ * 2. Send acceptable arguments to the client.
+ * 3. Receive rebuttal arguments from the client.
+ * 4. Send the optimal prescription to the client.
+ * 
+ * @author Jiang Aiwei
+ *
+ */
 
 public class ServerHandle extends Thread {
 
@@ -35,7 +51,7 @@ public class ServerHandle extends Thread {
             // determine whether continue to enter inference rules
             while (flag.trim().equals("yes")) {
             	// Accept inference rules passed from the client
-                byte[] str = new byte[1024];
+                byte[] str = new byte[1024*3];
                 in .read(str);
                 System.out.println("The inference rules passed from client：" + new String(str));
                 // Separate arguments sent by the client with commas, then store the arguments into
@@ -49,13 +65,16 @@ public class ServerHandle extends Thread {
                         if (i != argumentList.length - 1) {
                             bufferedWriter.write(argumentList[i].trim() + "\r\n");
                             bufferedWriter.flush();
-                        }
+                        }else {
+                        	bufferedWriter.write(argumentList[i].trim());
+                            bufferedWriter.flush();
+						}
                     }
                 }
                 
                 // Transfer "data has been writen" to client side
-                byte[] s = new byte[64];
-                s = "Data has been writen".getBytes();
+                //byte[] s = new byte[64];
+                byte[] s = "Execution complete! Data has been writen".getBytes();
                 out.write(s);
                 out.flush();
                 // Receive the flag which decide whether to continue entering the inference rules
@@ -65,6 +84,7 @@ public class ServerHandle extends Thread {
             }
             // Determine if there is a point to attack。
             while (attackFlag.trim().equals("yes")) {
+            	Extension<DungTheory> Ex1 = new Extension<DungTheory>();
                 System.out.println("Start reasoning");
                 // Initialize an instance of BuiltAT that creates argumentation Theory 
                 // according to inference rules in the ASPIC document.
@@ -75,17 +95,28 @@ public class ServerHandle extends Thread {
                 ArrayList < Argument > argList = new ArrayList < > ();
                 String accArg = "";
                 for (Argument arg: aaf) {
+                	Ex1.add(arg);
                     argList.add(arg);
                 }
+                ArrayList<Argument> accArgList = new ArrayList<>();
+                for(Argument arg:aaf) {
+                	if(aaf.isAcceptable(arg,Ex1)) {
+                		accArgList.add(arg);
+                	}
+                }
                 // Separate arguments by colons
-                for (int i = 0; i < argList.size(); i++) {
-                    if (i != argList.size() - 1) {
-                        accArg += argList.get(i).toString() + ";";
+                for (int i = 0; i < accArgList.size(); i++) {
+                    if (i != accArgList.size() - 1) {
+                        accArg += accArgList.get(i).toString() + ";";
                     } else {
-                        accArg += argList.get(i).toString();
+                        accArg += accArgList.get(i).toString();
                     }
                 }
                 System.out.println(accArg);
+                System.out.println("The attacks in the argumentation system is:");
+                for(Attack at:aaf.getAttacks()) {
+                	System.out.println(at);
+                }
                 // Transmit acceptable arguments to client side
                 byte[] resultByte = accArg.getBytes();
                 out.write(resultByte);
@@ -101,25 +132,36 @@ public class ServerHandle extends Thread {
                     String[] rebuttalList = refutedArgument.split(",");
                     try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("C:\\Users\\dell\\Desktop\\aspictest.txt", true))) {
                         for (int i = 0; i <= rebuttalList.length - 1; i++) {
-                            if (i != rebuttalList.length - 1) {
-                                bufferedWriter.write(rebuttalList[i].trim() + "\r\n");
+                        	if(i == 0) {
+                        		bufferedWriter.newLine();
+                        		bufferedWriter.write(rebuttalList[i].trim());
+                        		bufferedWriter.flush();
+                        	}else if (i != rebuttalList.length - 1) {
+                        		bufferedWriter.write(rebuttalList[i].trim() + "\r\n");
                                 bufferedWriter.flush();
-                            }
+							}else if (i == rebuttalList.length - 1) {
+                            	bufferedWriter.write(argumentList[i].trim());
+                                bufferedWriter.flush();
+							}
                         }    
                     }
                 }else {
-                	   // 服务器应该发送最终答案给客户端
+                	   // Deliver the optimal prescription to the client
+                	   Medicine finalMedicine = null;
+                	   RankbasedOnPosition rank = new RankbasedOnPosition(accArgList);
+                	   finalMedicine = rank.bestMedicine();
+                	   byte[] medicineByte = finalMedicine.name.getBytes();
+                	   out.write(medicineByte);
 					   break;
 				}
             }
 
-            // 关闭数据流
+            // close the data stream
             in .close();
             out.close();
-            System.out.println("服务器处理完成。。。");
+            System.out.println("Server processing complete。。。");
             socket.close();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
