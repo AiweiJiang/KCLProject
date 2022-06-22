@@ -53,21 +53,25 @@ public class Client {
             	System.out.println("Welcome to use the argument-based paramedic system!!!");
                 System.out.println("please enter inference rules and premises which will help the system make decisions:");
                 String str1 = input.nextLine();
-                // Transfer the inference rules typed by agents to server
-                out.write(str1.getBytes());
-                out.flush();
-                System.out.println("====================================================");
-                System.out.println("Continue to enter inference rules or not:(yes or no)");
-                flag = input.nextLine();
-                // Transfer the flag which decide whether continue to enter inference rules
-                out.write(flag.getBytes());
-                out.flush();
-                // Receive the processing result of server
-                byte[] str = new byte[128];
-                in .read(str);
-                System.out.println("====================================================");
-                System.out.println("The result of the server running: " + new String(str));
-                //System.out.println("----------------------------------------------------");
+                if(str1 == null || str1.equals("")) {
+                	System.err.println("The inference rule and premise cannot be empty!!! Please enter again.");
+                }else {
+                	// Transfer the inference rules typed by agents to server
+                    out.write(str1.getBytes());
+                    out.flush();
+                    System.out.println("====================================================");
+                    System.out.println("Continue to enter inference rules or not:(yes or no)");
+                    flag = input.nextLine();
+                    // Transfer the flag which decide whether continue to enter inference rules
+                    out.write(flag.getBytes());
+                    out.flush();
+                    // Receive the processing result of server
+                    byte[] str = new byte[128];
+                    in .read(str);
+                    System.out.println("====================================================");
+                    System.out.println("The result of the server running: " + new String(str));
+                    
+				}
             }
             // To attack an acceptable argument, the user enters an argument. If not, the user gets an acceptable
             // set of arguments.
@@ -97,6 +101,7 @@ public class Client {
         				}
         			}
                 }
+                System.out.println("==========================");
                 System.out.println("The possible diseases are:");
                 for(String disease:accDisease) {
                 	System.out.println(disease);
@@ -115,16 +120,25 @@ public class Client {
                     out.write(refutedArgument.getBytes());
                     out.flush();
 
-                } else {
+                } else if (attackFlag.trim().equals("no")) {
                     // Accept the optimal prescription from the server
                 	System.out.println("===================================");
                 	System.out.println("According to the position-based ranking, the best prescription is:");
                 	byte[] finalMedcinebyte = new byte[256];
+                	byte[] performanceByte = new byte[256];
+                	byte[] priceByte = new byte[256];
                 	in.read(finalMedcinebyte);
+                	in.read(performanceByte);
+                	in.read(priceByte);
                 	String finalMedicine = new String(finalMedcinebyte);
-                	System.out.println(finalMedicine.trim());
+                	String finalPerformance = new String(performanceByte);
+                	String finalPrice = new String(priceByte);
+                	System.out.println(finalMedicine.trim() + " performance:" + finalPerformance.trim() + " price:" + finalPrice.trim());
                     break;
-                }
+                }else {
+					System.err.println("Please enter yes or no, and do not enter other characters");
+					attackFlag = "yes";
+				}
 
             }
 
