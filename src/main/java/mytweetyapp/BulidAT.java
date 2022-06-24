@@ -58,7 +58,7 @@ public class BulidAT {
         proList.add(new Proposition("cough"));
         proList.add(new Proposition("breathlessness"));
         proList.add(new Proposition("nocturnalSymptoms"));
-        proList.add(new Proposition("seasonalVariations "));
+        proList.add(new Proposition("seasonalVariations"));
         proList.add(new Proposition("chestInfection"));
         proList.add(new Proposition("reducedOxygenSaturation"));
         proList.add(new Proposition("BlueLips"));

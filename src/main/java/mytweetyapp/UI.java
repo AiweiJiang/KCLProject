@@ -195,11 +195,13 @@ public class UI {
             	byte[] command = "Attack".getBytes();
             	try {
 					out.write(command);
+					out.flush();
 					String rules = ta3.getText();
 					int rulesLength = rules.length();
 					String lengthStr = Integer.toString(rulesLength);
 					System.out.println(lengthStr);
 					out.write(lengthStr.getBytes());
+					out.flush();
 					if (rules.length() == 0) {
 						JOptionPane.showMessageDialog(f, "The text content cannot be empty. Please enter it again!");
 	                    textArea.grabFocus();
@@ -276,17 +278,19 @@ public class UI {
             	byte[] command = "Upload".getBytes();
             	try {
 					out.write(command);
-					
+					out.flush();
 					String rules = textArea.getText();
 					int rulesLength = rules.length();
 					String lengthStr = Integer.toString(rulesLength);
 					out.write(lengthStr.getBytes());
+					out.flush();
 					if (rules.length() == 0) {
 						JOptionPane.showMessageDialog(f, "The text content cannot be empty. Please enter it again!");
 	                    textArea.grabFocus();
 					}else {
 						byte[] rulesByte = rules.getBytes();
 		            	out.write(rulesByte);
+		            	out.flush();
 		            	
 		            	byte[] resultByte = new byte[256];
 		            	in.read(resultByte);

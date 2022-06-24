@@ -8,6 +8,8 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.time.chrono.ThaiBuddhistChronology;
 import java.util.ArrayList;
+
+import org.jgrapht.alg.spanning.EsauWilliamsCapacitatedMinimumSpanningTree;
 import org.tweetyproject.arg.aspic.syntax.AspicArgumentationTheory;
 import org.tweetyproject.arg.dung.semantics.Extension;
 import org.tweetyproject.arg.dung.syntax.Argument;
@@ -52,7 +54,7 @@ public class ServerHandle extends Thread {
                 	byte[] lengthByte = new byte[256];
 					in.read(lengthByte);
 					String lengthStr = new String(lengthByte);
-					System.out.println(lengthStr);
+					//System.out.println(lengthStr);
 					int length = Integer.valueOf(lengthStr.trim()).intValue();
 					if (length == 0) {
 						System.err.println("Error: client enter null rules!");
@@ -61,20 +63,20 @@ public class ServerHandle extends Thread {
 						in.read(rulesByte);
 						String rulesStr = new String(rulesByte);
 						System.out.println("The inference rules which is passed from client is:" + rulesStr);
-						String[] rulesSplit = rulesStr.split(",");
+						ExtractSymptom ES = new ExtractSymptom(rulesStr);
+						ArrayList<String> symptoms = ES.extract();
 						// Write each argument to a local ASPIC text file
 		                try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("C:\\Users\\dell\\Desktop\\aspictest.txt", true))) {
-		                    for (int i = 0; i <= rulesSplit.length - 1; i++) {
+		                	for (int i = 0; i <= symptoms.size() - 1; i++) {
 		                    	if (i == 0) {
 		                    		bufferedWriter.newLine();
-		                    		bufferedWriter.write(rulesSplit[i].trim() + "\r\n");
+		                    		bufferedWriter.write(symptoms.get(i).trim() + "\r\n");
 		                    		bufferedWriter.flush();
-		                    	}
-		                        if (i != rulesSplit.length - 1 && i != 0) {
-		                            bufferedWriter.write(rulesSplit[i].trim() + "\r\n");
+		                    	}else if (i != symptoms.size() - 1 && i != 0) {
+		                            bufferedWriter.write(symptoms.get(i).trim() + "\r\n");
 		                            bufferedWriter.flush();
-		                        }else {
-		                        	bufferedWriter.write(rulesSplit[i].trim());
+		                        }else if (i == symptoms.size() - 1) {
+		                        	bufferedWriter.write(symptoms.get(i).trim());
 		                            bufferedWriter.flush();
 								}
 		                    }
@@ -121,11 +123,12 @@ public class ServerHandle extends Thread {
 	                // Transmit acceptable arguments to client side
 	                byte[] resultByte = accArg.getBytes();
 	                out.write(resultByte);
-	                
+	                out.flush();
 	                Medicine finalMedcine = null;
 	                RankbasedOnPosition rank = new RankbasedOnPosition(accArgList);
 	                finalMedcine = rank.bestMedicine();
 	                out.write(finalMedcine.getName().getBytes());
+	                out.flush();
 				}else if (commandStr.trim().equals("Attack")) {
 					byte[] lengthByte = new byte[256];
 					in.read(lengthByte);
@@ -138,20 +141,20 @@ public class ServerHandle extends Thread {
 						in.read(rulesByte);
 						String rulesStr = new String(rulesByte);
 						System.out.println("The rebuts rules which is passed from client is:" + rulesStr);
-						String[] rulesSplit = rulesStr.split(",");
+						ExtractSymptom ES = new ExtractSymptom(rulesStr);
+						ArrayList<String> symptoms = ES.extract();
 						// Write each argument to a local ASPIC text file
 		                try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("C:\\Users\\dell\\Desktop\\aspictest.txt", true))) {
-		                    for (int i = 0; i <= rulesSplit.length - 1; i++) {
+		                    for (int i = 0; i <= symptoms.size() - 1; i++) {
 		                    	if (i == 0) {
 		                    		bufferedWriter.newLine();
-		                    		bufferedWriter.write(rulesSplit[i].trim() + "\r\n");
+		                    		bufferedWriter.write(symptoms.get(i).trim() + "\r\n");
 		                    		bufferedWriter.flush();
-		                    	}
-		                        if (i != rulesSplit.length - 1 && i != 0) {
-		                            bufferedWriter.write(rulesSplit[i].trim() + "\r\n");
+		                    	}else if (i != symptoms.size() - 1 && i != 0) {
+		                            bufferedWriter.write(symptoms.get(i).trim() + "\r\n");
 		                            bufferedWriter.flush();
-		                        }else {
-		                        	bufferedWriter.write(rulesSplit[i].trim());
+		                        }else if (i == symptoms.size() - 1) {
+		                        	bufferedWriter.write(symptoms.get(i).trim());
 		                            bufferedWriter.flush();
 								}
 		                    }
@@ -193,11 +196,12 @@ public class ServerHandle extends Thread {
 		                // Transmit acceptable arguments to client side
 		                byte[] resultByte = accArg.getBytes();
 		                out.write(resultByte);
-		                
+		                out.flush();
 		                Medicine finalMedcine = null;
 		                RankbasedOnPosition rank = new RankbasedOnPosition(accArgList);
 		                finalMedcine = rank.bestMedicine();
 		                out.write(finalMedcine.getName().getBytes());
+		                out.flush();
 					}
 					
 				}else if (commandStr.trim().equals("close")) {
