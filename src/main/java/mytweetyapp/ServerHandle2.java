@@ -153,10 +153,10 @@ public class ServerHandle2 extends Thread {
                 }else if (attackFlag.trim().equals("no")) {
                 	   // Deliver the optimal prescription to the client
                 	   Medicine finalMedicine = null;
-                	   RankbasedOnPosition rank = new RankbasedOnPosition(accArgList);
-                	   finalMedicine = rank.bestMedicine();
-                	   byte[] medicineByte = finalMedicine.name.getBytes();
-                	   out.write(medicineByte);
+//                	   RankbasedOnPosition rank = new RankbasedOnPosition(accArgList,"price");
+//                	   finalMedicine = rank.bestMedicine();
+//                	   byte[] medicineByte = finalMedicine.name.getBytes();
+//                	   out.write(medicineByte);
                 	   byte[] performanceByte = String.valueOf(finalMedicine.performance).getBytes();
                 	   byte[] priceByte = String.valueOf(finalMedicine.price).getBytes();
                 	   out.write(performanceByte);

@@ -130,6 +130,11 @@ public class BulidAT {
         proList.add(new Proposition("immunotherapy"));
         proList.add(new Proposition("painkiller"));
         proList.add(new Proposition("drinkplenty"));
+        // result
+        proList.add(new Proposition("cured"));
+        proList.add(new Proposition("price"));
+        proList.add(new Proposition("performance"));
+        proList.add(new Proposition("sideEffect"));
         
         AspicArgumentationTheory < PlFormula > t = new AspicArgumentationTheory < PlFormula > (new PlFormulaGenerator());
         t.setRuleFormulaGenerator(new PlFormulaGenerator());

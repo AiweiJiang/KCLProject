@@ -16,12 +16,14 @@ public class Medicine {
 	String name;
 	int performance;
 	int price;
-	int finalMark;
+	int sideEffect;
+	double finalMark;
 	
-	public Medicine(String inputname,int inperformance,int inprice) {
+	public Medicine(String inputname,int inperformance,int inprice,int inSideEffect) {
 		name = inputname;
 		performance = inperformance;
 		price = inprice;
+		sideEffect = inSideEffect;
 	}
 	
 	public String getName() {
@@ -34,6 +36,10 @@ public class Medicine {
 	
 	public int getPrice() {
 		return price;
+	}
+	
+	public int getSideEffect() {
+		return sideEffect;
 	}
 	
 }

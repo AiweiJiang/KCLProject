@@ -33,13 +33,5 @@ public class ExtractSymptom {
 		
 	}
 	
-	public static void main(String[] args) {
-        ExtractSymptom Es = new ExtractSymptom("I feel that I have wheezing, chestInfection, BlueLips and cough. Oh! I also feel breathlessness and reducedOxygenSaturation");
-        ArrayList<String> resultArrayList = new ArrayList<>();
-        resultArrayList = Es.extract();
-        for (String str: resultArrayList) {
-        	System.out.println(str);
-        }
-    }
 	
 }
